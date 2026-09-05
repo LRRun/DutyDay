@@ -6,3 +6,5 @@ dist-worker
 coverage
 *.log
 .DS_Store
+
+.idea
