@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssignmentStatus {
+  scheduled
+  completed
+  cancelled
+}
+
+enum NotificationStatus {
+  pending
+  processing
+  sent
+  failed
+  skipped
+}
+
+enum NotificationType {
+  day_before
+  same_day
+}
+
+enum NotificationMode {
+  day_before
+  same_day
+  both
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  failedLoginCount Int  @default(0) @map("failed_login_count")
+  lockedUntil  DateTime? @map("locked_until")
+  lastLoginAt  DateTime? @map("last_login_at")
+  sessionVersion Int     @default(1) @map("session_version")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Member {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("members")
+}
+
+model ScheduleSettings {
+  id                Int              @id @default(1)
+  monday            Boolean          @default(true)
+  tuesday           Boolean          @default(true)
+  wednesday         Boolean          @default(true)
+  thursday          Boolean          @default(true)
+  friday            Boolean          @default(true)
+  saturday          Boolean          @default(false)
+  sunday            Boolean          @default(false)
+  emailEnabled      Boolean          @default(true) @map("email_enabled")
+  notificationMode  NotificationMode @default(day_before) @map("notification_mode")
+  notificationTime  String           @default("18:00") @map("notification_time")
+  timezone          String           @default("Asia/Shanghai")
+  dayBeforeSubjectTemplate String     @default("明天轮到你值日") @map("day_before_subject_template")
+  dayBeforeBodyTemplate    String     @default("你好，{{recipient_name}}：\n\n明天（{{duty_date}}）轮到你和 {{partner_name}} 负责值日。\n\n本次值日成员：\n{{member_1_name}}\n{{member_2_name}}\n\n请记得按时完成值日。") @map("day_before_body_template")
+  sameDaySubjectTemplate   String     @default("今天轮到你值日") @map("same_day_subject_template")
+  sameDayBodyTemplate      String     @default("你好，{{recipient_name}}：\n\n今天（{{duty_date}}）轮到你和 {{partner_name}} 负责值日。\n\n本次值日成员：\n{{member_1_name}}\n{{member_2_name}}\n\n请记得按时完成值日。") @map("same_day_body_template")
+  pendingRuleChange Boolean          @default(false) @map("pending_rule_change")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  @@map("schedule_settings")
+}
+
+model ScheduleException {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  type      String   @default("skip")
+  reason    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("schedule_exceptions")
+}
+
+model RotationState {
+  id                 Int        @id @default(1)
+  cursor             Int        @default(0)
+  lastAssignmentDate DateTime?  @db.Date @map("last_assignment_date")
+  lastAssignmentId   String?    @map("last_assignment_id")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  @@map("rotation_state")
+}
+
+model Assignment {
+  id                 String               @id @default(cuid())
+  dutyDate           DateTime             @db.Date @map("duty_date")
+  member1Id          String               @map("member_1_id")
+  member1Name        String               @map("member_1_name")
+  member1Email       String?              @map("member_1_email")
+  member2Id          String               @map("member_2_id")
+  member2Name        String               @map("member_2_name")
+  member2Email       String?              @map("member_2_email")
+  cursorBefore       Int                  @map("cursor_before")
+  status             AssignmentStatus     @default(scheduled)
+  notificationStatus String               @default("pending") @map("notification_status")
+  notificationSentAt DateTime?            @map("notification_sent_at")
+  isManualOverride   Boolean              @default(false) @map("is_manual_override")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  notificationLogs   NotificationLog[]
+
+  @@index([status, dutyDate])
+  @@map("assignments")
+}
+
+model NotificationLog {
+  id                String             @id @default(cuid())
+  assignmentId      String             @map("assignment_id")
+  assignment        Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  memberId          String             @map("member_id")
+  email             String
+  notificationType  NotificationType   @map("notification_type")
+  scheduledFor      DateTime           @map("scheduled_for")
+  status            NotificationStatus @default(pending)
+  providerMessageId String?            @map("provider_message_id")
+  errorMessage      String?            @map("error_message")
+  attemptCount      Int                @default(0) @map("attempt_count")
+  nextAttemptAt     DateTime?          @map("next_attempt_at")
+  lockedAt          DateTime?          @map("locked_at")
+  sentAt            DateTime?          @map("sent_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  @@unique([assignmentId, memberId, notificationType])
+  @@index([status, scheduledFor])
+  @@map("notification_logs")
+}
+
+model WorkerState {
+  id                       Int       @id @default(1)
+  lastTickAt               DateTime? @map("last_tick_at")
+  lastSchedulerSuccessAt   DateTime? @map("last_scheduler_success_at")
+  lastNotificationRunAt    DateTime? @map("last_notification_run_at")
+  lastAssignmentGeneratedAt DateTime? @map("last_assignment_generated_at")
+  lastEmailSentAt          DateTime? @map("last_email_sent_at")
+  lastError                String?   @map("last_error")
+  workerVersion            String?   @map("worker_version")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  @@map("worker_state")
+}
