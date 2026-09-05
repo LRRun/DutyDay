@@ -1,6 +1,6 @@
 "use client";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { X } from "@/components/doodle-icons";
 import { Button } from "./button";
 
 export function Dialog({ trigger, title, description, children }: { trigger: React.ReactNode; title: string; description?: string; children: React.ReactNode }) {

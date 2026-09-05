@@ -1,1 +1,0 @@
-export default function AdminLoading() { return <div className="content" aria-label="正在加载"><div className="skeleton" style={{ width: 130, height: 30, marginBottom: 26 }} /><div className="grid grid-2"><div className="skeleton" style={{ height: 310 }} /><div className="skeleton" style={{ height: 310 }} /></div></div>; }

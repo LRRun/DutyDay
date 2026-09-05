@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "@/components/doodle-icons";
 import { createContext, useContext, useRef, useTransition } from "react";
 import { toast } from "sonner";
 import type { ActionResult } from "@/app/actions";

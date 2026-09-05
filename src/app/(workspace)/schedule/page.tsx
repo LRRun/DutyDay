@@ -1,12 +1,25 @@
+import { EdgeFriends } from "@/components/cozy-scene";
 import { addCalendarDays, formatDateOnly, isWeekdayEnabled } from "@/domain/schedule/calendar";
 import { simulateSchedule } from "@/domain/schedule/simulator";
 import { todayInTimezone } from "@/domain/schedule/notification-time";
+import { AnimalAvatar, animalFor } from "@/components/cozy-icons";
 import { PageHeading } from "@/components/page-heading";
 import { prisma } from "@/lib/db";
 import { weekdayZh } from "@/lib/presentation";
 import { weekdaySettingsFrom } from "@/services/scheduler-service";
 
 export const dynamic = "force-dynamic";
+
+function CalendarPair({ members, tentative = false }: { members: { id: string; name: string }[]; tentative?: boolean }) {
+  return <div className="calendar-assignment">
+    <div className="calendar-people">{members.map((member, index) => <div className="calendar-person" key={`${member.id}-${index}`}>
+      <AnimalAvatar kind={animalFor(member.id)} size={26} />
+      <strong>{member.name}</strong>
+    </div>)}</div>
+    <span className={`calendar-status ${tentative ? "is-tentative" : "is-confirmed"}`}>{tentative ? "暂定" : "正式"}</span>
+  </div>;
+}
+
 
 export default async function SchedulePage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const { month: monthParam } = await searchParams;
@@ -31,12 +44,12 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   const exception = new Map(exceptions.map((item) => [formatDateOnly(item.date), item]));
   const previousMonth = (() => { const d = new Date(`${monthStart}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); return d.toISOString().slice(0, 7); })();
   const nextMonth = (() => { const d = new Date(`${monthStart}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); return d.toISOString().slice(0, 7); })();
-  return <div className="content"><PageHeading eyebrow="" title="排班日历" action={<div className="actions"><a className="ui-button ui-button-secondary" href={`?month=${previousMonth}`}>上个月</a><span className="ui-button ui-button-secondary" aria-current="date">{month}</span><a className="ui-button ui-button-secondary" href={`?month=${nextMonth}`}>下个月</a></div>} />
-    <div className="actions small muted" style={{ marginBottom: 14 }}><span className="status"><span className="dot" />正式</span><span>暂定</span><span>跳过</span></div>
-    <section className="table-wrap"><div className="calendar">{weekdayZh.map((day) => <div className="calendar-day" style={{ minHeight: 42 }} key={day}><strong className="small">{day}</strong></div>)}{Array.from({ length: 42 }, (_, index) => {
+  return <div className="content schedule-content"><PageHeading eyebrow="" title="排班日历" action={<div className="actions"><a className="ui-button ui-button-secondary" href={`?month=${previousMonth}`}>上个月</a><span className="ui-button ui-button-secondary" aria-current="date">{month}</span><a className="ui-button ui-button-secondary" href={`?month=${nextMonth}`}>下个月</a></div>} />
+    <div className="actions small muted" style={{ marginBottom: 14 }}><span className="pill good">正式</span><span className="pill preview-key">暂定</span><span className="pill skip-key">跳过</span></div>
+    <div className="calendar-notebook"><div className="calendar-edge"><EdgeFriends /></div><div className="notebook-wave" aria-hidden="true" /><section className="table-wrap"><div className="calendar">{weekdayZh.map((day) => <div className="calendar-weekday" key={day}><strong className="small">{day}</strong></div>)}{Array.from({ length: 42 }, (_, index) => {
       const date = addCalendarDays(gridStart, index); const f = formal.get(date); const p = preview.get(date); const e = exception.get(date); const inMonth = date.startsWith(month);
       const disabled = !isWeekdayEnabled(date, weekdaySettingsFrom(settings));
-      return <div className={`calendar-day ${inMonth ? "" : "other"}`} key={date}><span className="calendar-num">{Number(date.slice(-2))}{date === today ? " · 今天" : ""}</span>{f ? <div className="calendar-event"><strong>{f.member1Name} · {f.member2Name}</strong><br />正式</div> : p ? <div className="calendar-event preview">{p.member1.name} · {p.member2.name}<br />暂定</div> : e ? <div className="calendar-event skip">跳过 · {e.reason}</div> : disabled ? <div className="calendar-event skip">休息</div> : null}</div>;
-    })}</div></section>
+      return <div className={`calendar-day ${inMonth ? "" : "other"} ${date === today ? "is-today" : ""} ${disabled && !f && !p && !e ? "is-rest" : ""}`} key={date}><span className="calendar-num">{Number(date.slice(-2))}{date === today ? " · 今天" : ""}</span>{f ? <CalendarPair members={[{ id: f.member1Id, name: f.member1Name }, { id: f.member2Id, name: f.member2Name }]} /> : p ? <CalendarPair members={[p.member1, p.member2]} tentative /> : e ? <div className="calendar-event skip">跳过 · {e.reason}</div> : disabled ? <div className="calendar-event skip">休息</div> : null}</div>;
+    })}</div></section><div className="notebook-footer" aria-hidden="true"><span className="footer-wave" /></div></div>
   </div>;
 }

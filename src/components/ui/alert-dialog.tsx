@@ -1,7 +1,7 @@
 "use client";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { useState, useTransition } from "react";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "@/components/doodle-icons";
 import { toast } from "sonner";
 import type { ActionResult } from "@/app/actions";
 import { Button } from "./button";

@@ -1,10 +1,7 @@
 "use server";
 
-import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createSession, destroySession, requireAdmin } from "@/lib/auth";
 import { EmailTemplateValidationError, renderEmailTemplate, validateEmailTemplate } from "@/domain/notifications/email-template";
 import { prisma } from "@/lib/db";
 import { getEmailProvider } from "@/lib/email/provider";
@@ -16,12 +13,11 @@ export type ActionResult = { ok: true; message: string } | { ok: false; message:
 function knownError(error: unknown): string {
   if (error instanceof z.ZodError) return error.issues[0]?.message || "请检查填写内容";
   if (error instanceof EmailTemplateValidationError) return error.message;
-  if (error instanceof Error && ["至少需要启用一个值日星期", "至少需要 2 名参与值日的成员", "无效时区", "当前密码不正确", "SMTP 尚未配置"].includes(error.message)) return error.message;
+  if (error instanceof Error && ["至少需要启用一个值日星期", "至少需要 2 名参与值日的成员", "无效时区", "SMTP 尚未配置"].includes(error.message)) return error.message;
   return "操作未完成，请稍后重试";
 }
 
 async function mutate(event: string, work: () => Promise<void>, success: string): Promise<ActionResult> {
-  await requireAdmin();
   try {
     await work();
     revalidatePath("/", "layout");
@@ -31,32 +27,6 @@ async function mutate(event: string, work: () => Promise<void>, success: string)
     return { ok: false, message: knownError(error) };
   }
 }
-
-export async function loginAction(formData: FormData) {
-  const parsed = z.object({ email: z.string().trim().email(), password: z.string().min(1) }).safeParse(Object.fromEntries(formData));
-  if (!parsed.success) redirect("/login?error=invalid");
-  const admin = await prisma.admin.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
-  const now = new Date();
-  if (admin?.lockedUntil && admin.lockedUntil > now) redirect("/login?error=locked");
-  const dummyHash = "$2b$12$LQv3c1yqBW8VHsU8xIYhVeLjZ7SftfY7sL2D6kbCPzcJ.1qWtFImK";
-  const valid = await bcrypt.compare(parsed.data.password, admin?.passwordHash || dummyHash);
-  if (!admin || !valid) {
-    if (admin) {
-      const failures = admin.failedLoginCount + 1;
-      await prisma.admin.update({ where: { id: admin.id }, data: failures >= 5
-        ? { failedLoginCount: 0, lockedUntil: new Date(now.getTime() + 15 * 60_000) }
-        : { failedLoginCount: failures },
-      });
-      if (failures >= 5) redirect("/login?error=locked");
-    }
-    redirect("/login?error=credentials");
-  }
-  await prisma.admin.update({ where: { id: admin.id }, data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: now } });
-  await createSession(admin.id, admin.sessionVersion);
-  redirect("/dashboard");
-}
-
-export async function logoutAction() { await destroySession(); redirect("/login"); }
 
 const memberSchema = z.object({
   name: z.string().trim().min(1, "请填写姓名").max(80, "姓名不能超过 80 个字符"),
@@ -164,31 +134,15 @@ export async function deleteExceptionAction(formData: FormData) {
   }, "跳过日期已删除");
 }
 
-export async function changePasswordAction(formData: FormData) {
-  return mutate("admin.password.failed", async () => {
-    const session = await requireAdmin();
-    const data = z.object({
-      currentPassword: z.string().min(1, "请填写当前密码"),
-      newPassword: z.string().min(12, "新密码至少需要 12 个字符").max(128),
-      confirmPassword: z.string(),
-    }).refine((value) => value.newPassword === value.confirmPassword, { message: "两次输入的新密码不一致" }).parse(Object.fromEntries(formData));
-    const admin = await prisma.admin.findUniqueOrThrow({ where: { id: session.adminId } });
-    if (!(await bcrypt.compare(data.currentPassword, admin.passwordHash))) throw new Error("当前密码不正确");
-    const updated = await prisma.admin.update({ where: { id: admin.id }, data: { passwordHash: await bcrypt.hash(data.newPassword, 12), sessionVersion: { increment: 1 } } });
-    await createSession(updated.id, updated.sessionVersion);
-  }, "密码已更新");
-}
-
 export async function sendTestEmailAction() {
   return mutate("notification.test.failed", async () => {
-    const session = await requireAdmin();
-    const admin = await prisma.admin.findUniqueOrThrow({ where: { id: session.adminId } });
+    const recipient = z.string().email("请在配置中填写有效的 TEST_EMAIL_TO 测试收件地址").parse((process.env.TEST_EMAIL_TO || "").trim());
     const settings = await prisma.scheduleSettings.findUniqueOrThrow({ where: { id: 1 } });
     const sample = renderEmailTemplate(settings.dayBeforeSubjectTemplate, settings.dayBeforeBodyTemplate, {
       recipient_name: "测试收件人", partner_name: "测试搭档", duty_date: "2026-09-05", member_1_name: "测试收件人", member_2_name: "测试搭档",
     });
-    await getEmailProvider().sendEmail({ to: admin.email, ...sample, subject: `[测试] ${sample.subject}` });
-  }, "已用保存的模板发送测试邮件到管理员邮箱");
+    await getEmailProvider().sendEmail({ to: recipient, ...sample, subject: `[测试] ${sample.subject}` });
+  }, "已用保存的模板发送测试邮件到测试收件地址");
 }
 
 export async function recalculateAction() {

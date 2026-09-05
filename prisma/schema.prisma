@@ -32,20 +32,6 @@ enum NotificationMode {
   both
 }
 
-model Admin {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  failedLoginCount Int  @default(0) @map("failed_login_count")
-  lockedUntil  DateTime? @map("locked_until")
-  lastLoginAt  DateTime? @map("last_login_at")
-  sessionVersion Int     @default(1) @map("session_version")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  @@map("admins")
-}
-
 model Member {
   id        String   @id @default(cuid())
   name      String

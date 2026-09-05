@@ -1,0 +1,13 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "file": "public/illustrations/edge-cat.png",
+      "prompt": "Production transparent PNG UI mascot. Extremely simple flat 2D kawaii cartoon illustration, smooth solid pastel fills, clean rounded cocoa outline #604737, no grain, NO pencil texture, NO watercolor, NO fuzzy fur, NO realistic shading, NO glow, NO drop shadow, NO backdrop, NO text, NO white border. Cream #fff9ed, grey #a69b91, honey #f3cf98, pink cheeks. Round squishy head, tiny dot eyes, tiny w smile. Genuine alpha background. Front facing HEAD AND TWO PAWS ONLY peeking over an imaginary horizontal ledge, paws at bottom of image clearly separated, no drawn ledge. Close-cropped with 5 percent transparent margin. Intended to overlap a website card edge so paws rest on top of the edge. One grey and cream kitten with triangular ears, tiny pink nose, two cream paws."
+    },
+    {
+      "file": "public/illustrations/edge-dog.png",
+      "prompt": "Production transparent PNG UI mascot. Extremely simple flat 2D kawaii cartoon illustration, smooth solid pastel fills, clean rounded cocoa outline #604737, no grain, NO pencil texture, NO watercolor, NO fuzzy fur, NO realistic shading, NO glow, NO drop shadow, NO backdrop, NO text, NO white border. Cream #fff9ed, grey #a69b91, honey #f3cf98, pink cheeks. Round squishy head, tiny dot eyes, tiny w smile. Genuine alpha background. Front facing HEAD AND TWO PAWS ONLY peeking over an imaginary horizontal ledge, paws at bottom of image clearly separated, no drawn ledge. Close-cropped with 5 percent transparent margin. Intended to overlap a website card edge so paws rest on top of the edge. One honey golden puppy with smooth floppy ears, cream muzzle, tiny cocoa nose, two golden paws."
+    }
+  ]
+}

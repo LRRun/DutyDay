@@ -4,7 +4,7 @@ import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type 
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { GripVertical, LoaderCircle, Pencil, X } from "lucide-react";
+import { GripVertical, LoaderCircle, Pencil, X } from "@/components/doodle-icons";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteMemberAction, reorderMembersAction, toggleMemberAction, updateMemberAction } from "@/app/actions";
@@ -21,7 +21,8 @@ function EditMember({ member }: { member: Member }) {
 }
 
 function MemberActiveSwitch({ member }: { member: Member }) {
-  const [checked, setChecked] = useState(member.active); const [pending, startTransition] = useTransition();
+  const [checked, setChecked] = useState(member.active); const [source, setSource] = useState(member.active); const [pending, startTransition] = useTransition();
+  if (source !== member.active) { setSource(member.active); setChecked(member.active); }
   return <div className="actions"><Switch checked={checked} disabled={pending} aria-label={`${checked ? "停用" : "启用"}${member.name}`} onCheckedChange={(next) => { const previous = checked; setChecked(next); startTransition(async () => { try { const data = new FormData(); data.set("id", member.id); const result = await toggleMemberAction(data); if (result.ok) toast.success(result.message); else { setChecked(previous); toast.error(result.message); } } catch { setChecked(previous); toast.error("连接中断，请稍后重试"); } }); }} /><span className="small muted">{checked ? "参与排班" : "已停用"}</span></div>;
 }
 
@@ -36,10 +37,14 @@ function SortableRow({ member, order }: { member: Member; order: number }) {
 }
 
 export function MemberList({ initialMembers }: { initialMembers: Member[] }) {
-  const [members, setMembers] = useState(initialMembers); const [, startTransition] = useTransition();
+  const [members, setMembers] = useState(initialMembers);
+  const [source, setSource] = useState(initialMembers);
+  const [pending, startTransition] = useTransition();
+  // Server revalidation supplies fresh members; do not keep the initial snapshot.
+  if (source !== initialMembers) { setSource(initialMembers); setMembers(initialMembers); }
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   function onDragEnd(event: DragEndEvent) {
-    if (!event.over || event.active.id === event.over.id) return;
+    if (pending || !event.over || event.active.id === event.over.id) return;
     const previous = members; const from = members.findIndex((item) => item.id === event.active.id); const to = members.findIndex((item) => item.id === event.over!.id); const next = arrayMove(members, from, to); setMembers(next);
     startTransition(async () => { try { const result = await reorderMembersAction(next.map((item) => item.id)); if (result.ok) toast.success(result.message); else { setMembers(previous); toast.error(result.message); } } catch { setMembers(previous); toast.error("连接中断，请稍后重试"); } });
   }

@@ -1,0 +1,17 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "file": "public/illustrations/nap-dog.png",
+      "prompt": "A single transparent PNG decorative sticker for a cozy pastel Chinese duty roster website. A tiny chubby golden floppy-eared puppy sleeping curled on a soft sage green gingham cushion, hugging a little cream star. Wide horizontal silhouette. Charming Japanese children's stationery illustration, warm cocoa brown slightly irregular outlines, rounded simple forms, peach blush, muted honey gold, cream and sage palette, very subtle colored-pencil texture. Polished cute illustration, not realistic watercolor, not 3D render, no text, no border, no white sticker outline. Genuine transparent alpha background, generous transparent margin. Complete subject, crisp at small size."
+    },
+    {
+      "file": "public/illustrations/yarn-cat.png",
+      "prompt": "A single transparent PNG decorative sticker for a cozy pastel Chinese duty roster website. A round cream-and-grey kitten lying on its back playfully hugging a dusty pink ball of yarn, one little paw lifted, eyes tiny curved happy arcs, blushing peach cheeks. Horizontal compact composition. Charming Japanese children's stationery illustration, warm cocoa brown slightly irregular outlines, rounded simple forms, muted sage cream pink grey palette, very subtle colored-pencil texture. Polished cute illustration, not realistic watercolor, not 3D render, no text, no border, no white sticker outline. Genuine transparent alpha background, generous transparent margin. Complete subject, crisp at small size."
+    },
+    {
+      "file": "public/illustrations/meadow-corner.png",
+      "prompt": "A single transparent PNG botanical corner decoration for a cozy pastel Chinese duty roster website. A low gently sweeping cluster of five small cream daisies with honey yellow centers, rounded sage green leaves, a tiny peach butterfly, two little mushrooms in muted pink. Wide low composition with taller flowers at left tapering right, like a charming garden at the edge of a notebook. Warm cocoa brown delicate irregular outlines, simple rounded children's stationery illustration, muted pastel colors with subtle colored-pencil texture. No animals, no words, no scenery rectangle, no white sticker border, no photorealism. Genuine transparent alpha background. Generous margin, clean small-scale detail."
+    }
+  ]
+}

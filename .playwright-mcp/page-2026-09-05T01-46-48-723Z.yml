@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e51]:
+      - strong [ref=e60]: Duty Day
+      - heading "管理员登录" [level=1] [ref=e61]
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]: 管理员邮箱
+          - textbox "管理员邮箱" [ref=e65]
+        - generic [ref=e66]:
+          - generic [ref=e67]: 密码
+          - textbox "密码" [ref=e68]
+        - button "登录" [ref=e69] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e70]

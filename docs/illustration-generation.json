@@ -1,0 +1,13 @@
+{
+  "mode": "Built-in image_gen",
+  "assets": [
+    {
+      "file": "window-friends.webp",
+      "prompt": "Use case: illustration-story. Create one beautiful production-ready landscape illustration background for a cozy Chinese duty roster web app. Wide 3:2 canvas. Soft Japanese picture-book watercolor and colored pencil on warm ivory paper, delicate natural hand-drawn warm brown lines, painterly texture, sophisticated charming illustration NOT flat vector clipart, NOT thick geometric SVG outlines, NOT 3D. A very cute plump fluffy grey-and-white kitten and a golden floppy-eared puppy resting side by side with their little front paws on a wooden windowsill. Big rounded heads, tiny relaxed dot eyes, small smiling mouths, subtle rosy cheeks, softly detailed fur, friendly natural expressions. Cozy pale wooden window, pale blue sky, small clouds, sage green potted leaves, a tiny stack of pastel books, warm morning light. Animals prominent in lower center-right. Background ivory #faf3e8, edges subtly fade into warm ivory paper, airy uncluttered composition. No typography, no letters, no labels, no interface, no watermark. This is a decorative illustration asset, not a screenshot. High-quality adorable storybook art."
+    },
+    {
+      "file": "garden-nap.webp",
+      "prompt": "Use case: illustration-story. One high-quality square decorative background illustration for the sidebar of a cozy duty-roster web app. A very adorable plump cream-and-ginger kitten sleeping curled up hugging a pale lavender cushion in a tiny sage-green garden nook with a few small butter-yellow daisies. Soft Japanese picture-book watercolor and colored-pencil illustration, delicate warm brown organic linework, soft fur, little pink cheeks, peaceful closed eyes, rounded paws, warm natural light, visible subtle paper texture, airy ivory #faf3e8 negative space in upper third, garden ground along bottom. Elegantly composed, tender, exceptionally cute and polished. Outer edges softly blend into warm ivory paper. No words, letters, typography, UI, frames or watermarks. Not flat vector clipart, not thick geometric SVG outlines, not 3D. Harmonizes with an ivory, sage green, pale peach and lavender web interface."
+    }
+  ]
+}

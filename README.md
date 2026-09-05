@@ -21,14 +21,14 @@ Web 与 Worker 使用同一份镜像、代码和数据库。未来日历条目�
 
 ```bash
 cp .env.example .env
-# 编辑 .env，至少修改 POSTGRES_PASSWORD、DATABASE_URL、SESSION_SECRET、ADMIN_EMAIL、ADMIN_PASSWORD
+# 编辑 .env，至少修改 POSTGRES_PASSWORD、DATABASE_URL
 docker compose up -d --build
 docker compose ps
 ```
 
-访问 `http://SERVER_IP:3000`，用 `.env` 中的管理员邮箱和密码登录。首次启动只创建管理员和必要的系统设置，不会向生产环境写入示例成员。后续重启不会覆盖已有管理员密码。
+访问 `http://SERVER_IP:3000` 即可使用全部管理功能，无需账号或密码。首次启动只创建必要的系统设置，不会写入示例成员。
 
-`DATABASE_URL` 中的数据库密码必须与 `POSTGRES_PASSWORD` 一致。`SESSION_SECRET` 建议使用至少 32 字节的随机值，例如 `openssl rand -base64 48` 的输出。使用 HTTPS 反向代理时，将 `APP_URL` 改为公网 HTTPS 地址并设置 `SESSION_COOKIE_SECURE=true`；直接通过内部 HTTP 访问时保持 `false`。
+`DATABASE_URL` 中的数据库密码必须与 `POSTGRES_PASSWORD` 一致。`APP_URL` 设置为实际访问地址。
 
 ## 日常操作
 
@@ -64,7 +64,7 @@ npm run worker
 
 ## SMTP 配置
 
-在 `.env` 中设置 `EMAIL_PROVIDER=smtp`、`SMTP_HOST`、`SMTP_PORT`、`SMTP_SECURE`、`SMTP_USER`、`SMTP_PASSWORD` 和 `SMTP_FROM`。密码只从环境变量读取，不会显示在界面或日志中。常见的 587 端口使用 `SMTP_SECURE=false`（STARTTLS），465 端口通常使用 `true`。修改后运行 `docker compose up -d --force-recreate web worker`。
+在 `.env` 中设置 `EMAIL_PROVIDER=smtp`、`SMTP_HOST`、`SMTP_PORT`、`SMTP_SECURE`、`SMTP_USER`、`SMTP_PASSWORD` 和 `SMTP_FROM`。密码只从环境变量读取，不会显示在界面或日志中。常见的 587 端口使用 `SMTP_SECURE=false`（STARTTLS），465 端口通常使用 `true`。`TEST_EMAIL_TO` 是手动测试邮件的收件地址，留空时无法发送测试邮件；正式值日提醒仍发送到成员邮箱。修改后运行 `docker compose up -d --force-recreate web worker`。
 
 邮件主题和正文在“设置 → 通知 → 邮件内容”中维护，可分别设置前一天提醒和当天提醒。支持收件人、搭档、值日日期及两名值日成员变量；界面提供点击插入和即时预览。模板保存时会拒绝未知变量、非受控 Mustache 语法和带换行的主题，Worker 始终读取已保存模板发送。
 
